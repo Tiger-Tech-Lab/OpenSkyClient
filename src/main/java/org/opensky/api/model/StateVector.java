@@ -4,26 +4,27 @@ import com.google.gson.*;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class StateVector {
     public String icao24;
     public String callsign;
     public String origin_country;
-    public int time_position;
-    public int last_contact;
-    public float longitude;
-    public float latitude;
-    public float baro_altitude;
-    public boolean on_ground;
-    public float velocity;
-    public float true_track;
-    public float vertical_rate;
+    public Optional<Integer> time_position;
+    public Optional<Integer> last_contact;
+    public Optional<Float> longitude;
+    public Optional<Float> latitude;
+    public Optional<Float> baro_altitude;
+    public Optional<Boolean> on_ground;
+    public Optional<Float> velocity;
+    public Optional<Float> true_track;
+    public Optional<Float> vertical_rate;
     public int[] sensors;
-    public float geo_altitude;
-    public String squawk;
-    public boolean spi;
-    public int position_source;
-    public int category;
+    public Optional<Float> geo_altitude;
+    public Optional<String> squawk;
+    public Optional<Boolean> spi;
+    public Optional<Integer> position_source;
+    public Optional<Integer> category;
 
 
     public static class StateVectorDeserializer implements JsonDeserializer<StateVector>
@@ -35,27 +36,63 @@ public class StateVector {
 
             JsonArray value_array = json_element.getAsJsonArray();
 
-            ret.icao24 = value_array.get(0).getAsString();
-            ret.callsign = value_array.get(1).getAsString();
-            ret.origin_country = value_array.get(2).getAsString();
-            ret.time_position = value_array.get(3).getAsInt();
-            ret.last_contact = value_array.get(4).getAsInt();
-            ret.longitude = value_array.get(5).getAsFloat();
-            ret.latitude = value_array.get(6).getAsFloat();
-            ret.baro_altitude = value_array.get(7).getAsFloat();
-            ret.on_ground = value_array.get(8).getAsBoolean();
-            ret.velocity = value_array.get(9).getAsFloat();
-            ret.true_track = value_array.get(10).getAsFloat();
-            ret.vertical_rate = value_array.get(11).getAsFloat();
-            ret.sensors = null;
-            ret.geo_altitude = value_array.get(13).getAsFloat();
-            ret.squawk = value_array.get(14).isJsonNull() ? null : value_array.get(14).getAsString();
-            ret.spi = value_array.get(15).getAsBoolean();
-            ret.position_source = value_array.get(16).getAsInt();
-            if(value_array.size()>17) {
-                ret.category = value_array.get(17).isJsonNull() ? null : value_array.get(17).getAsInt();
-            }
+            ret.icao24          = value_array.get(0).getAsString();
+            ret.callsign        = value_array.get(1).getAsString();
+            ret.origin_country  = value_array.get(2).getAsString();
+            ret.time_position   = optionalInteger(value_array,3);
+            ret.last_contact    = optionalInteger(value_array, 4);
+            ret.longitude       = optionalFloat(value_array,5);
+            ret.latitude        = optionalFloat(value_array,6);
+            ret.baro_altitude   = optionalFloat(value_array,7);
+            ret.on_ground       = optionalBoolean(value_array,8);
+            ret.velocity        = optionalFloat(value_array,9);
+            ret.true_track      = optionalFloat(value_array,10);
+            ret.vertical_rate   = optionalFloat(value_array,11);
+            ret.sensors         = null; // 12
+            ret.geo_altitude    = optionalFloat(value_array,13);
+            ret.squawk          = optionalString(value_array, 14);
+            ret.spi             = optionalBoolean(value_array,15);
+            ret.position_source = optionalInteger(value_array, 16);
+            ret.category        = optionalInteger(value_array, 17);
+
             return ret;
+        }
+
+        public Optional<Boolean> optionalBoolean(JsonArray values, int pos){
+            // If the values exist, and its not JSON Null
+            if(values.size() > pos && !values.get(pos).isJsonNull()){
+                return Optional.of(new Boolean(values.get(pos).getAsBoolean()));
+            }else{
+                return Optional.empty();
+            }
+        }
+
+        public Optional<String> optionalString(JsonArray values, int pos){
+            // If the values exist, and its not JSON Null
+            if(values.size() > pos && !values.get(pos).isJsonNull()){
+                return Optional.of(values.get(pos).getAsString());
+            }else{
+                return Optional.empty();
+            }
+        }
+
+        public Optional<Integer> optionalInteger(JsonArray values, int pos)
+        {
+            // If the values exist, and its not JSON Null
+            if(values.size() > pos && !values.get(pos).isJsonNull()){
+                return Optional.of(new Integer(values.get(pos).getAsInt()));
+            }else{
+                return Optional.empty();
+            }
+        }
+
+        public Optional<Float> optionalFloat(JsonArray values, int pos){
+            // If the values exist, and its not JSON Null
+            if(values.size() > pos && !values.get(pos).isJsonNull()){
+                return Optional.of(new Float(values.get(pos).getAsFloat()));
+            }else{
+                return Optional.empty();
+            }
         }
     }
 }
